@@ -23,23 +23,14 @@ public class Obstacle : MonoBehaviour
     {
         // transform.Translate(Vector2.down * moveSpeed * Time.deltaTime);
         MovingObastacle();
-        lifeTime += Time.deltaTime;
-        if (lifeTime > maxLifeTime)
-        {
-            lifeTime = 0f;
-            //ObstaclePool.Instance.ReturnToPool(this);
-            ObstaclePool.ObstacleInstance.ReturnToPool(this);
+        //lifeTime += Time.deltaTime;
+        //if (lifeTime > maxLifeTime)
+        //{
+        //    lifeTime = 0f;
+        //    //ObstaclePool.Instance.ReturnToPool(this);
+        //    ObstaclePool.ObstacleInstance.ReturnToPool(this);
 
-        }
-    }
-
-    void LifeTimeExpired()
-    {
-        if(lifeTime <= maxLifeTime)
-        {
-            //ObstaclePool.Instance.ReturnToPool(this);
-            ObstaclePool.ObstacleInstance.ReturnToPool(this);
-        }
+        //}
     }
     void MovingObastacle()
     {
@@ -49,6 +40,7 @@ public class Obstacle : MonoBehaviour
     {
         if(collision.gameObject.layer == 16)
         {
+            
             ObstaclePool.ObstacleInstance.ReturnToPool(this);
         }
         else

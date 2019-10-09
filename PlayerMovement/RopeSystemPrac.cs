@@ -6,47 +6,36 @@ using System.Linq;
 public class RopeSystemPrac : MonoBehaviour
 {
 
-
-    //[SerializeField] GameObject mRopePoint;
+    [Header("Direct Reference")]
     [SerializeField] private RopePoint mRopePointscript;
-    //[SerializeField] Rigidbody2D mRopePointRb;
 
     private Vector2 mPlayerPos;
     private LineRenderer mLineRenderer;
     [SerializeField] private LayerMask mRopeLayerMask;
-    public EdgeCollider2D EdgeCollider { get; set; }
-    //public DistanceJoint2D mRopeJoint;
-    //public Vector2 mPlayerPos;
 
     public bool BRopeAttached { get; set; }
     public bool BRopeFiring { get; set; }
 
+    [Header("RopePointVariables")]
     [SerializeField] private GameObject mRopePoint;
     [SerializeField] private Rigidbody2D mRopePointrb;
     [SerializeField] private DistanceJoint2D mRopeJoint;
-
-
-    public Vector2 RopePointProjectilePos;
     public List<Vector2> RopePointPositions = new List<Vector2>();
-
     private Dictionary<Vector2, int> wrapPointMap = new Dictionary<Vector2, int>();
 
-
-
-
-
-    //[SerializeField] private float yDistanceAppliedFloat;
+    [Header("RopePointSpeed")]
     [SerializeField] private float mFiringMultiplier = 20f;
     [SerializeField] private float mMaxRopeDistance = 30f;
 
 
     // to check rope attached obstacle is moving...
     // and check it's position to move all ropePointPositions..
-    public bool BMoving = false;
-    public Vector2 ObstaclePos;
+    public bool BAttachedObjectMoving { get; set;}
+    public Vector2 AttachedObstaclePos;
 
     // to control swinging ability
     [SerializeField] private PlayerMovementPrac playerMovementPrac;
+    
     // to control rappeling Rope
     public float ClimbSpeed = 3f;
     [SerializeField] private bool bColliding;
@@ -55,51 +44,30 @@ public class RopeSystemPrac : MonoBehaviour
     public bool BRopeReady;
     public float CooldownTime;
     public float MaxCooldownTime = 1f;
-    // for difficulty setting.. not used yet.
-    public float CooldownTimeMultiplier;
-
-
-
+    
 
     // Use this for initialization
     void Awake()
     {
         
-        List<float> listTest = new List<float>();
-        listTest.Add(2f);
-        listTest.Add(5f);
-        listTest.Add(8f);
-        Dictionary<float, int> keyValuePairsTest = listTest.ToDictionary(x => x / 2, x => (int)x * 2);
-        foreach(KeyValuePair<float,int> key in keyValuePairsTest)
-        {
-            Debug.Log(key + " and " + key.Value);
-        }
-        listTest.RemoveAt(1);
-        foreach(float listElement in listTest)
-        {
-            Debug.Log(listElement);
-        }
-        
-        EdgeCollider = GetComponent<EdgeCollider2D>();
-
-        // mRopePointscript = GetComponentInChildren<RopePoint>();
-
         // set active status after awake
         mRopePoint.transform.position = transform.position;
         mRopePoint.SetActive(false);
-        //mRopePointscript.gameObject.SetActive(false);
-
-        //ropePoint = Prefabs.Load()
-        //MAddCollider = false;
+        
+        mLineRenderer = GetComponent<LineRenderer>();
         /*
-        if (MLineRenderer == null)
+        if (mLineRenderer.enabled == false)
         {
-            Debug.LogWarning("Line Renderer isn't assigned.");
-            //CreateDefaultLineRenderer();
+            mLineRenderer.enabled = true;
         }
         */
-
-        mLineRenderer = GetComponent<LineRenderer>();
+        /*
+        if (mRopePoint.activeSelf == false)
+        {
+            mRopePoint.SetActive(true);
+        }
+        */
+        BAttachedObjectMoving = false;
         BRopeFiring = false;
         //mRopePointscript = FindObjectOfType<RopePoint>();
     }
@@ -107,8 +75,14 @@ public class RopeSystemPrac : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (LevelManager.BGamePaused)
+        if (LevelManager.BGamePaused || LevelManager.BGameWon)
         {
+            return;
+        }
+        if (LevelManager.BEndConditionMet)
+        {
+            mRopePoint.SetActive(false);
+            mLineRenderer.enabled = false;
             return;
         }
         if (!BRopeReady)
@@ -120,7 +94,6 @@ public class RopeSystemPrac : MonoBehaviour
             BRopeReady = true;
             CooldownTime = 0f;
         }
-
 
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mPlayerPos = transform.position;
@@ -160,42 +133,18 @@ public class RopeSystemPrac : MonoBehaviour
                             
                         }
                         
-                        // here should be distanceset but let's try without it.
-                        /*
-                        var colliderRb = colliderWithVertices.GetComponent<Rigidbody2D>();
-                        if (colliderRb != null)
-                        {
-                            UpdateRopePositionsOnMyOwn(colliderRb.velocity.y);
-                            mRopePointscript.MbAttachedMovingObject = true;
-                            Debug.Log("there is collider rb");
-                        }
-                        else
-                        {
-                            // zero movement speed
-                            UpdateRopePositionsOnMyOwn(0f);
-                            Debug.Log("there isn't collider rb");
-                        }
-                        */
 
                     }
 
-
-
-                }
-                else
-                {
-                    // zero movement speed
-                    // UpdateRopePositionsOnMyOwn(0f);
                 }
             }
 
             mLineRenderer.SetPosition(0, transform.position);
             mLineRenderer.SetPosition(1, mRopePoint.transform.position);
             
-            
             //MEdgeCollider.points[0] = transform.position;
             //MEdgeCollider.points[1] = ropePointProjectilePos;
-            Debug.Log("should draw line!");
+            
 
 
         }
@@ -210,16 +159,10 @@ public class RopeSystemPrac : MonoBehaviour
         }
 
 
-        // loading order to up!
+        
         HandleRopeInput();
         UpdateRopePositions();
-        if (!BMoving)
-        {
-            
-        }
-        
         HandleRopeLength();
-
     }
 
     private void HandleRopeInput()
@@ -235,28 +178,22 @@ public class RopeSystemPrac : MonoBehaviour
 
                 // set active and make it dynamic.
                 
-                
                 mRopePointrb.bodyType = RigidbodyType2D.Dynamic;
-                //ropePointProjectilePos = transform.position;
                 mRopePoint.transform.position = transform.position;
                 mRopePoint.SetActive(true);
-                //mRopePointscript.gameObject.SetActive(true);
-                //mRopePointscript.mRopePointRb.bodyType = RigidbodyType2D.Dynamic;
-                //mRopePointscript.gameObject.transform.position = transform.position;
+                
 
                 float xDistance = mousePos.x - transform.position.x;
                 float yDistance = mousePos.y - transform.position.y;
 
                 var aimAngle = Mathf.Atan2(yDistance, xDistance);
-                //float xVeloc = 
+                
 
                 if (aimAngle < 0f)
                 {
                     aimAngle = aimAngle + (Mathf.PI * 2);
                 }
-                // Vector3 aimDirection = Quaternion.Euler()
-
-
+                
                 float xVeloc = Mathf.Cos(aimAngle) * mFiringMultiplier;
                 float yVeloc = Mathf.Sin(aimAngle) * mFiringMultiplier;
 
@@ -295,10 +232,7 @@ public class RopeSystemPrac : MonoBehaviour
         mLineRenderer.SetPosition(0, transform.position);
         mLineRenderer.SetPosition(1, transform.position);
 
-        // RopePointProjectilePos = transform.position;
-
-        //mRopePointscript.gameObject.SetActive(false);
-        // mRopePoint.transform.position = transform.position;
+        
         mRopePoint.SetActive(false);
 
         //mLineRenderer.gameObject.SetActive(false);
@@ -328,25 +262,25 @@ public class RopeSystemPrac : MonoBehaviour
         
         // if moving obstacle overwrap the ropePositions..... (excluding last one, which is the present rope point position.)
 
-        ObstaclePos = mRopePointscript.ObstacleObject.transform.position;
-        if (ObstaclePos != null)
+        AttachedObstaclePos = mRopePointscript.ObstacleObject.transform.position;
+        if (AttachedObstaclePos != null)
         {
             for (int i = 0; i < RopePointPositions.Count - 1; ++i)
             {
                 //if (transform.position.)
-                if (RopePointPositions[i].x < ObstaclePos.x)
+                if (RopePointPositions[i].x < AttachedObstaclePos.x)
                 {
-                    if(RopePointPositions[i].y > ObstaclePos.y)
+                    if(RopePointPositions[i].y > AttachedObstaclePos.y)
                     {
-                        Debug.Log("it's overlapping..");
+                        
                         RopePointPositions.RemoveAt(i);
                     }
                 }
                 else
                 {
-                    if (RopePointPositions[i].y > ObstaclePos.y)
+                    if (RopePointPositions[i].y > AttachedObstaclePos.y)
                     {
-                        Debug.Log("it's overlapping..");
+                        
                         RopePointPositions.RemoveAt(i);
                     }
                 }
@@ -454,21 +388,5 @@ public class RopeSystemPrac : MonoBehaviour
         //ropePointProjectile
     }
 
-    /*
-    protected virtual void CreateDefaultLineRenderer()
-    {
-        MLineRenderer = gameObject.AddComponent<LineRenderer>();
-        MLineRenderer.positionCount = 0;
-        // wtf is this code?
-        MLineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-        //
-        MLineRenderer.startColor = Color.white;
-        MLineRenderer.endColor = Color.white;
-        MLineRenderer.startWidth = 0.2f;
-        MLineRenderer.endWidth = 0.2f;
-        MLineRenderer.useWorldSpace = true;
-
-    }
-    */
 
 }

@@ -7,6 +7,7 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] float minSpawnDelay = 0.5f;
     [SerializeField] float maxSpawnDelay = 1.2f;
     bool MBSpawning = true;
+    private float maxGameTime = 60f;
     private float gameTime;
 
     // store children's Position.
@@ -44,7 +45,7 @@ public class ObstacleSpawner : MonoBehaviour
 
         gameTime += Time.deltaTime;
         //StartCoroutine(spawnObstacle);
-        if (gameTime > 20f)
+        if (gameTime > maxGameTime)
         {
             MBSpawning = false;
         }

@@ -25,7 +25,7 @@ public class CameraLerpToPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (LevelManager.BGamePaused || LevelManager.BGameEnded)
+        if (LevelManager.BGamePaused || LevelManager.BEndConditionMet || LevelManager.BGameWon)
         {
             return;
         }

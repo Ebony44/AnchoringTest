@@ -10,9 +10,7 @@ public class ObstaclePool : MonoBehaviour//MyGenericObjectPool<Obstacle>
 
     private void Awake()
     {
-        // for testing, checking length of sington
-        Debug.Log("count of Instance's objects' " + objects.Count);
-        Debug.Log("count of obstaclePrefabs.Length " + obstaclePrefabs.Length);
+        
         if (ObstacleInstance == null)
         {
             ObstacleInstance = this;
@@ -24,9 +22,7 @@ public class ObstaclePool : MonoBehaviour//MyGenericObjectPool<Obstacle>
     }
     public Obstacle Get()
     {
-        Debug.Log("Get from Pool");
         int index = Random.Range(0, obstaclePrefabs.Length);
-        //Debug.Log(obstaclePrefabs.Length);
         if (objects.Count == 0)
         {
             AddToPoolFromArray(1,index);

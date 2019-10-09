@@ -2,33 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovementPrac : MonoBehaviour {
-
+public class PlayerMovementPrac : MonoBehaviour
+{
+    [Header("GroundChecking")]
     [SerializeField] private float halfHeightchecking;
     public bool BOnGround;
     [SerializeField] private float groundCheckingRayDistance;
 
-
-    [SerializeField] private float moveSpeed = 6f;
-    [SerializeField] private float jumpSpeed = 5f;
+    [Header("MovementModifier")]
+    [SerializeField] private float moveSpeed = 12f;
+    [SerializeField] private float jumpSpeed = 8f;
+    
 
     private float horizontalInput;
     private float jumpInput;
+    [SerializeField] private Transform faceDirection;
 
-    public bool BJumping;
-
-    // for swinging purpose
+    
+    [Header("SwingingVariables")]
     public bool bSwinging;
     public Vector2 RopeHook;
-    [SerializeField] private float swingForce = 4f;
-
-
-    private Vector2 targetPos;
+    [SerializeField] private float swingForce = 10f;
 
     public Rigidbody2D PlayerRb { get; set; }
     private SpriteRenderer playerSprite;
-
-    [SerializeField] private Transform faceDirection;
+    
 
     /*
     [Header("GrapplingHook")]
@@ -39,39 +37,20 @@ public class PlayerMovementPrac : MonoBehaviour {
     // Use this for initialization
     void Awake ()
     {
-        Debug.Log(" -1 is " + Mathf.Atan2(-1, 1) * Mathf.Rad2Deg);
-        Debug.Log(" -1 is " + Mathf.Atan2(1, -1) * Mathf.Rad2Deg);
-
-        CircleCollider2D testCircleCollider2D = GetComponent<CircleCollider2D>();
         
-
-
         PlayerRb = GetComponent<Rigidbody2D>();
         playerSprite = GetComponent<SpriteRenderer>();
-	}
-
-    void Start()
-    {
-        StartCoroutine(PrintSomething());
-    }
-    
-    IEnumerator PrintSomething()
-    {
-        Debug.Log("Print Something");
-        yield return new WaitForSeconds(3f);
-        Debug.Log("print after 3 sec");
+        gameObject.SetActive(true);
         
-    }
-    IEnumerator FireContinuously()
-    {
-        // instantiate. in while. and in while, yield return.
-        float firingPeriod = 0.5f;
-        yield return new WaitForSeconds(firingPeriod);
-        // end
-    }
+	}
 
     void FixedUpdate()
     {
+        if (LevelManager.BGamePaused || LevelManager.BGameWon || LevelManager.BEndConditionMet)
+        {
+            return;
+        }
+
         if (horizontalInput > 0f || horizontalInput < 0f)
         {
             playerSprite.flipX = horizontalInput < 0f;
@@ -85,13 +64,13 @@ public class PlayerMovementPrac : MonoBehaviour {
                 {
                     perpendicularDirection = new Vector2(-playerToHookDirection.y, playerToHookDirection.x);
                     var leftPerpPos = (Vector2)transform.position - perpendicularDirection * -2f;
-                    Debug.DrawLine(transform.position, leftPerpPos, Color.green, 0.5f);
+                    // Debug.DrawLine(transform.position, leftPerpPos, Color.green, 0.5f);
                 }
                 else
                 {
                     perpendicularDirection = new Vector2(playerToHookDirection.y, -playerToHookDirection.x);
                     var rightPerpPos = (Vector2)transform.position - perpendicularDirection * 2f;
-                    Debug.DrawLine(transform.position, rightPerpPos, Color.green, 0.5f);
+                    // Debug.DrawLine(transform.position, rightPerpPos, Color.green, 0.5f);
                 }
 
                 var force = perpendicularDirection * swingForce;
@@ -129,16 +108,21 @@ public class PlayerMovementPrac : MonoBehaviour {
             }
         }
 
-        
-        
-
-
 
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
+        if (LevelManager.BGamePaused || LevelManager.BGameWon)
+        {
+            return;
+        }
+        if (LevelManager.BEndConditionMet)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
 
         horizontalInput = Input.GetAxis("Horizontal");
         jumpInput = Input.GetAxis("Jump");

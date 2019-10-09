@@ -7,23 +7,16 @@ public class RopePoint : MonoBehaviour {
     public Rigidbody2D RopePointRb { get; set; }
     private SpriteRenderer mRopePointRenderer;
 
-    //[SerializeField] private DistanceJoint2D ropeJoint;
-    // player's members.. hmm it's dirty
     [SerializeField] private RopeSystemPrac mRopeSystemPrac;
-    //[SerializeField] GameObject RopeSystemPrac;
+    
     private DistanceJoint2D mRopeJoint;
-    [SerializeField] private Vector2 mPlayerPos;
+    private Vector2 mPlayerPos;
     private LineRenderer mLineRenderer;
 
     public bool BAttachedMovingObject { get; set; }
+    
     // for RopeSystemPrac...
-    public GameObject ObstacleObject;
-
-    // Setting For animator
-    //[Header("Header")]
-    //[SerializeField] private Animator mAnim;
-
-    //
+    public GameObject ObstacleObject { get; set; }
 
     // Use this for initialization
     void Awake () {
@@ -44,7 +37,7 @@ public class RopePoint : MonoBehaviour {
             return;
         }
         ObstacleObject = col.gameObject;
-        Debug.Log("ropePoint Collide!");
+        
         mRopeSystemPrac.BRopeAttached = true;
         mRopeSystemPrac.BRopeFiring = false;
 
@@ -83,7 +76,7 @@ public class RopePoint : MonoBehaviour {
         {
             //mRopePointRb.velocity = new Vector2(-col.transform.position.x + 3.5f, col.transform.position.y);
             //mRopePointRb.velocity = new Vector2(-col.transform.position.x + 3.5f, col.transform.position.y);
-            mRopeSystemPrac.BMoving = true;
+            mRopeSystemPrac.BAttachedObjectMoving = true;
             var colliderRb = col.gameObject.GetComponent<Rigidbody2D>();
             RopePointRb.velocity = colliderRb.velocity;
             return;
@@ -101,8 +94,19 @@ public class RopePoint : MonoBehaviour {
 
 
     // Update is called once per frame
-    void Update () {
-         // mRopeSystemPrac.RopePointProjectilePos = transform.position;
+    void Update ()
+    {
+        /*
+        if (LevelManager.BGamePaused || LevelManager.BGameEnded || LevelManager.BGameWon)
+        {
+            RopePointRb.velocity = new Vector2(0, 0);
+            RopePointRb.bodyType = RigidbodyType2D.Kinematic;
+            return;
+        }
+        */
+        // mRopeSystemPrac.RopePointProjectilePos = transform.position;
+
+
 
         if (mRopeSystemPrac.BRopeFiring)
         {

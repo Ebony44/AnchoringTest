@@ -15,7 +15,9 @@ public class LavaBehavior : MonoBehaviour
     {
         if (collision.gameObject.GetComponent<PlayerMovementPrac>() == true)
         {
-            // SceneManager.
+
+            LevelManager.BGameEnded = true;
+            
         }
     }
     // Update is called once per frame
@@ -26,7 +28,7 @@ public class LavaBehavior : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (LevelManager.BGamePaused || LevelManager.BGameEnded)
+        if (LevelManager.BGamePaused || LevelManager.BEndConditionMet)
         {
             return;
         }

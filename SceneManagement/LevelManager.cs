@@ -6,28 +6,27 @@ using TMPro;
 
 public class LevelManager : MonoBehaviour
 {
+    [Header("EndCondition")]
     public static bool BGameEnded = false;
+    public static bool BGameWon = false;
+    // for keep moving player and environment.
+    public static bool BEndConditionMet = false;
+    
     
     [SerializeField] private TextMeshProUGUI gameoverTextUGUI;
 
     public static bool BGamePaused = false;
     public GameObject PauseMenuUi;
-
     
 
-    // Start is called before the first frame update
     void Awake()
     {
-        
+        BGameEnded = false;
+        BGameWon = false;
+        BEndConditionMet = false;
     }
-
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.E))
-        {
-            BGameEnded = true;
-        }
         GamePauseCondition();
 
 
@@ -67,7 +66,9 @@ public class LevelManager : MonoBehaviour
     {
         //SceneManager
         Time.timeScale = 1f;
+        BGamePaused = false;
         SceneManager.LoadScene(2);
+        
     }
     public void QuitGame()
     {
@@ -76,24 +77,32 @@ public class LevelManager : MonoBehaviour
 
     public IEnumerator GameOverCondition()
     {
-        if (BGameEnded)
+        if (BGameEnded && !BGameWon)
         {
 
             string[] randomText = { "Blasted", "Busted", "Wasted", "Burned", "Incinerated" };
             int randomValue = Random.Range(0, randomText.Length);
-            //gameoverText.text = "You are " + randomText[randomValue] + " !";
-            //gameoverText.gameObject.SetActive(true);
             
             gameoverTextUGUI.text = "You are " + randomText[randomValue] + " !" + " Game will restart in 3 seconds";
             gameoverTextUGUI.gameObject.SetActive(true);
             //yield return new WaitForSeconds(3f);
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             BGameEnded = false;
-            
+            BEndConditionMet = true;
+
             yield return new WaitForSeconds(3f);
             SceneManager.LoadScene("Level 1 Scene");
-            
 
         }
+        else if (BGameWon && !BGameEnded)
+        {
+            
+            gameoverTextUGUI.text = "You find the way! Game will restart in 3 seconds";
+            BGameWon = false;
+            BGameEnded = false;
+            yield return new WaitForSeconds(3f);
+            SceneManager.LoadScene("Level 1 Scene");
+        }
+
     }
 }
